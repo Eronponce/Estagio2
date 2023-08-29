@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,33 +11,41 @@
         body {
             font-family: 'Arial', sans-serif;
         }
+
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
         }
+
         .btn-primary:hover {
             background-color: #0056b3;
             border-color: #0056b3;
         }
+
         .btn-success {
             background-color: #28a745;
             border-color: #28a745;
         }
+
         .btn-success:hover {
             background-color: #1a732d;
             border-color: #1a732d;
         }
+
         .btn-danger {
             background-color: #dc3545;
             border-color: #dc3545;
         }
+
         .btn-danger:hover {
             background-color: #ac2d38;
             border-color: #ac2d38;
         }
+
         .table {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .header {
             background-color: #333;
             padding: 20px;
@@ -44,86 +53,100 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .logo {
             color: white;
             font-size: 24px;
         }
     </style>
 </head>
+
 <body>
-  <div class="header">
-    <div class="logo">WDYP</div>
-
-  </div>
-  <div class="container mt-5">
-    <h1 class="mb-4">Planting Parameters</h1>
-
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label for="instanceSelect" class="form-label">Selecionar Instância Existente:</label>
-            <select id="instanceSelect" class="form-select" name="instance">
-                <option value="">Selecionar</option>
-                <!-- Adicionar opções para instâncias existentes -->
-                {% for instance in instances %}
-                    <option value="{{ instance.id }}">{{ instance.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="instanceName" class="form-label">Nome da Instância:</label>
-            <input type="text" class="form-control" id="instanceName" name="instance_name">
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="instanceAuthor" class="form-label">Autor:</label>
-            <input type="text" class="form-control" id="instanceAuthor" name="instance_author">
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-between mb-3">
-        <h2>Valores de Entrada</h2>
-        <button id="addRow" class="btn btn-success">Adicionar Linha</button>
+    <div class="header">
+        <div class="logo">WDYP</div>
     </div>
 
     <form method="post" action="{% url 'save_parameters' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary submit-button">Salvar Parâmetros</button>
-        <table class="table">
-            <thead>
-              <tr>
-                <th>P</th>
-                <th>K</th>
-                <th>Temperatura</th>
-                <th>Chuva</th>
-                <th>Umidade</th>
-                <th>pH</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="inputRows">
-              <!-- Linhas de entrada serão adicionadas aqui dinamicamente -->
-              {% for parameter in parameters %}
-              <tr>
-                <td><input type="text" value="{{ parameter.p }}" class="form-control" name="p"></td>
-                <td><input type="text" value="{{ parameter.k }}" class="form-control" name="k"></td>
-                <td><input type="text" value="{{ parameter.temperature }}" class="form-control" name="temperature"></td>
-                <td><input type="text" value="{{ parameter.rainfall }}" class="form-control" name="rainfall"></td>
-                <td><input type="text" value="{{ parameter.humidity }}" class="form-control" name="humidity"></td>
-                <td><input type="text" value="{{ parameter.ph }}" class="form-control" name="ph"></td>
-                <td><button class="btn btn-danger remove-row">Remover</button></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          
-        
-      </form>
-    <button id="executeButton" class="btn btn-primary">Executar</button>
-  </div>
+        <div class="container mt-5">
+            <h1 class="mb-4">Planting Parameters</h1>
 
-  <script>
-    // Adicionar nova linha
-    document.getElementById('addRow').addEventListener('click', function() {
-      const row = `
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="instanceSelect" class="form-label">Selecionar Instância Existente:</label>
+                    <select id="instanceSelect" class="form-select" name="instance">
+                        <option value="">Selecionar</option>
+                        <!-- Adicionar opções para instâncias existentes -->
+                        {% for instance in instances %}
+                        <option value="{{ instance.id }}">{{ instance.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary" id="loadInstanceButton">Carregar Instância</button>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="instanceName" class="form-label">Nome da Instância:</label>
+                    <input type="text" class="form-control" value="{{ selected_instance.name }}" id="instanceName"
+                        name="instance_name">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="instanceAuthor" class="form-label">Autor:</label>
+                    <input type="text" class="form-control" value="{{ selected_instance.author }}" id="instanceAuthor"
+                        name="instance_author">
+                </div>
+            </div>
+            
+            
+
+            <div class="d-flex justify-content-between mb-3">
+                <h2>Valores de Entrada</h2>
+                <button type="button" id="addRow" class="btn btn-success">Adicionar Linha</button>
+
+            </div>
+
+
+            <button type="submit" class="btn btn-primary submit-button">Salvar Parâmetros</button>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>P</th>
+                        <th>K</th>
+                        <th>Temperatura</th>
+                        <th>Chuva</th>
+                        <th>Umidade</th>
+                        <th>pH</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="inputRows">
+                    <!-- Linhas de entrada serão adicionadas aqui dinamicamente -->
+                    {% for parameter in parameters %}
+                    <tr>
+                        <td><input type="text" value="{{ parameter.p }}" class="form-control" name="p"></td>
+                        <td><input type="text" value="{{ parameter.k }}" class="form-control" name="k"></td>
+                        <td><input type="text" value="{{ parameter.temperature }}" class="form-control"
+                                name="temperature"></td>
+                        <td><input type="text" value="{{ parameter.rainfall }}" class="form-control" name="rainfall">
+                        </td>
+                        <td><input type="text" value="{{ parameter.humidity }}" class="form-control" name="humidity">
+                        </td>
+                        <td><input type="text" value="{{ parameter.ph }}" class="form-control" name="ph"></td>
+                        <td><button class="btn btn-danger remove-row">Remover</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+
+            <button id="executeButton" class="btn btn-primary">Executar</button>
+        </div>
+    </form>
+    <script>
+        // Adicionar nova linha
+        document.getElementById('addRow').addEventListener('click', function () {
+            const row = `
         <tr>
           <td><input type="text" class="form-control" name="p"></td>
           <td><input type="text" class="form-control" name="k"></td>
@@ -134,18 +157,43 @@
           <td><button class="btn btn-danger remove-row">Remover</button></td>
         </tr>
       `;
-      document.getElementById('inputRows').insertAdjacentHTML('beforeend', row);
-    });
+            document.getElementById('inputRows').insertAdjacentHTML('beforeend', row);
+        });
 
-    // Remover linha
-    document.addEventListener('click', function(event) {
-      if (event.target.classList.contains('remove-row')) {
-        event.target.closest('tr').remove();
-      }
-    });
-  </script>
+        // Remover linha
+        document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-row')) {
+                event.target.closest('tr').remove();
+            }
+        });
 
-  <!-- Include Bootstrap scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        function updateInputFields() {
+            const selectElement = document.getElementById('instanceSelect');
+            const selectedInstanceId = selectElement.value;
+
+            if (selectedInstanceId) {
+                // Get the instance data using Django's template variables
+                const instanceData = {
+                    name: '{{ selected_instance.name }}',
+                    author: '{{ selected_instance.author }}',
+                    // Add other instance data fields here...
+                };
+
+                // Update the input fields with the instance data
+                document.getElementById('instanceName').value = instanceData.name;
+                document.getElementById('instanceAuthor').value = instanceData.author;
+                // Update other input fields with instance data...
+            } else {
+                // Clear or reset the input fields
+                document.getElementById('instanceName').value = '';
+                document.getElementById('instanceAuthor').value = '';
+                // Clear or reset other input fields...
+            }
+        }
+    </script>
+
+    <!-- Include Bootstrap scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
