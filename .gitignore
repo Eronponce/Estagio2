@@ -21,10 +21,8 @@ venv/
 
 # Ignore OS generated files
 .DS_Store
-Thumbs.db
+.Thumbs.db
 # Ignore migration files
 
-**/migrations/
+.**/migrations/
 
-# Ignore Python cache files
-__pycache__/

@@ -1,103 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
-
+    {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planting Parameters</title>
+    <title>WDYP</title>
     <!-- Include Bootstrap styles -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
+    
     <style>
+        .logo{
+            width: 75px;
+           margin-left: 20px;
+        }
         body {
             font-family: 'Arial', sans-serif;
         }
 
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+        /* Rounded corners for elements */
+        .rounded-box {
+            border-radius: 10px;
         }
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
+        /* Transition effect for buttons */
+        .btn-transition {
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
-        .btn-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-
-        .btn-success:hover {
-            background-color: #1a732d;
-            border-color: #1a732d;
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background-color: #ac2d38;
-            border-color: #ac2d38;
-        }
 
         .table {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .header {
-            background-color: #333;
-            padding: 20px;
+            background-color: #FF9522;
+            padding: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .logo {
-            color: white;
-            font-size: 24px;
+        .table {
+            background-color: #CEEC97;
+            color: black;
         }
+
+        select {
+            background-color: #494368;
+            color: white;
+        }
+      
+       
+
+
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <div class="logo">WDYP</div>
-    </div>
+     <!--
+Falar que deu erro (spam)
+carregar sem nada da erro
 
-    <form method="post" action="{% url 'save_parameters' %}">
-        {% csrf_token %}
-        <div class="container mt-5">
-            <h1 class="mb-4">Planting Parameters</h1>
+colocar deletar do lado direito pra deleta instancia
+colocar tavle em scroll
+header pequeno em tela de celular
+
+
+
+
+    
+    
+    -->
+    <div class="header">
+        <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
+        <h1 style="font-family:Verdana, Geneva, Tahoma, sans-serif;" >What do <b>you </b> plant?</h1>
+    </div>
+    <div class="container mt-5">
+
+       
+            <form method="get" action="{% url 'load_instance' %}">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                <button type="submit" class="btn btn-secondary" id="loadInstanceButton">Carregar
+                    Instância</button>
+                <select id="instanceSelect" class="form-select" name="instance_id">
+                    <option value="">Selecionar</option>
+                    <!-- Adicionar opções para instâncias existentes -->
+                    {% for instance in instances %}
+                    <option value="{{ instance.id }}">{{ instance.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" name="delete_instance" value="{{ instance.id }}" class="btn btn-danger">Deletar Instância</button>
+                   
+            </div>
+            </form>
+       
+
+
+        <form method="post" action="{% url 'save_parameters' %}">
+            {% csrf_token %}
+
 
             <div class="row">
-                <div class="col-md-3 mb-3">
-                    <label for="instanceSelect" class="form-label">Selecionar Instância Existente:</label>
-                    <select id="instanceSelect" class="form-select" name="instance">
-                        <option value="">Selecionar</option>
-                        <!-- Adicionar opções para instâncias existentes -->
-                        {% for instance in instances %}
-                        <option value="{{ instance.id }}">{{ instance.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3 mb-3 d-flex align-items-end">
-                    <button type="button" class="btn btn-primary" id="loadInstanceButton">Carregar Instância</button>
-                </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="instanceName" class="form-label">Nome da Instância:</label>
-                    <input type="text" class="form-control" value="{{ selected_instance.name }}" id="instanceName"
+                    <input type="text" class="form-control" value="{{ instance.name }}" id="instanceName"
                         name="instance_name">
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-6 mb-3">
                     <label for="instanceAuthor" class="form-label">Autor:</label>
-                    <input type="text" class="form-control" value="{{ selected_instance.author }}" id="instanceAuthor"
+                    <input type="text" class="form-control" value="{{ instance.author }}" id="instanceAuthor"
                         name="instance_author">
                 </div>
             </div>
-            
-            
+
+
 
             <div class="d-flex justify-content-between mb-3">
                 <h2>Valores de Entrada</h2>
@@ -139,9 +158,10 @@
             </table>
 
 
-
-            <button id="executeButton" class="btn btn-primary">Executar</button>
-        </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button id="executeButton" class="btn  btn-lg  btn-outline-success">Executar</button>
+            </div>
+    </div>
     </form>
     <script>
         // Adicionar nova linha
@@ -190,6 +210,11 @@
                 // Clear or reset other input fields...
             }
         }
+        document.getElementById('loadInstanceButton').addEventListener('click', function () {
+            loadInstance();
+        });
+
+
     </script>
 
     <!-- Include Bootstrap scripts -->
