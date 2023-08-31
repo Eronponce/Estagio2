@@ -1,137 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-    {% load static %}
+{% load static %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WDYP</title>
-    <!-- Include Bootstrap styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
-    
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
     <style>
-        .logo{
+        .logo {
             width: 75px;
-           margin-left: 20px;
+            margin-left: 20px;
         }
+
         body {
             font-family: 'Arial', sans-serif;
         }
 
-        /* Rounded corners for elements */
         .rounded-box {
             border-radius: 10px;
         }
 
-        /* Transition effect for buttons */
         .btn-transition {
             transition: background-color 0.3s, border-color 0.3s;
         }
 
-
         .table {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: black;
+            text-align: center;
+            overflow-y: auto;
+            max-height: 400px;
         }
 
-        .header {
+        .table-scrollable {
+            overflow-y: auto;
+            max-height: 400px;
+            display: block;
+        }
+
+        header {
             background-color: #FF9522;
             padding: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-        .table {
-            background-color: #CEEC97;
-            color: black;
+        header h1 {
+            flex-grow: 1;
+            text-align: center;
         }
+
+
 
         select {
             background-color: #494368;
             color: white;
         }
-      
-       
 
+        .form-control {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 
 <body>
-     <!--
-Falar que deu erro (spam)
-carregar sem nada da erro
-
-colocar deletar do lado direito pra deleta instancia
-colocar tavle em scroll
-header pequeno em tela de celular
-
-
-
-
-    
-    
-    -->
-    <div class="header">
+    <header class="header">
         <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
-        <h1 style="font-family:Verdana, Geneva, Tahoma, sans-serif;" >What do <b>you </b> plant?</h1>
-    </div>
-    <div class="container mt-5">
-
-       
-            <form method="get" action="{% url 'load_instance' %}">
-                {% csrf_token %}
-                <div class="input-group mb-3">
-                <button type="submit" class="btn btn-secondary" id="loadInstanceButton">Carregar
-                    Instância</button>
-                <select id="instanceSelect" class="form-select" name="instance_id">
+        <h1 id="main-title">What do <b>you</b> plant?</h1>
+    </header>
+    <main class="container mt-5">
+        <!-- Instance Loading Section -->
+        <form method="get" action="{% url 'load_instance' %}">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <button type="submit" class="btn btn-secondary" id="loadInstanceButton"
+                    aria-label="Load Instance">Carregar Instância</button>
+                <select id="instanceSelect" class="form-select" name="instance_id" aria-labelledby="main-title">
                     <option value="">Selecionar</option>
-                    <!-- Adicionar opções para instâncias existentes -->
                     {% for instance in instances %}
                     <option value="{{ instance.id }}">{{ instance.name }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" name="delete_instance" value="{{ instance.id }}" class="btn btn-danger">Deletar Instância</button>
-                   
+                <button type="submit" name="delete_instance" value="{{ instance.id }}" class="btn btn-danger"
+                    aria-label="Delete Instance">Deletar Instância</button>
             </div>
-            </form>
-       
-
-
+        </form>
         <form method="post" action="{% url 'save_parameters' %}">
             {% csrf_token %}
-
-
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="instanceName" class="form-label">Nome da Instância:</label>
                     <input type="text" class="form-control" value="{{ instance.name }}" id="instanceName"
-                        name="instance_name">
+                        name="instance_name" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="instanceAuthor" class="form-label">Autor:</label>
                     <input type="text" class="form-control" value="{{ instance.author }}" id="instanceAuthor"
-                        name="instance_author">
+                        name="instance_author" required>
                 </div>
             </div>
-
-
-
             <div class="d-flex justify-content-between mb-3">
                 <h2>Valores de Entrada</h2>
                 <button type="button" id="addRow" class="btn btn-success">Adicionar Linha</button>
-
             </div>
-
-
             <button type="submit" class="btn btn-primary submit-button">Salvar Parâmetros</button>
             <table class="table">
                 <thead>
                     <tr>
                         <th>P</th>
                         <th>K</th>
-                        <th>Temperatura</th>
+                        <th>Temperatura C°</th>
                         <th>Chuva</th>
                         <th>Umidade</th>
                         <th>pH</th>
@@ -142,82 +133,90 @@ header pequeno em tela de celular
                     <!-- Linhas de entrada serão adicionadas aqui dinamicamente -->
                     {% for parameter in parameters %}
                     <tr>
-                        <td><input type="text" value="{{ parameter.p }}" class="form-control" name="p"></td>
-                        <td><input type="text" value="{{ parameter.k }}" class="form-control" name="k"></td>
-                        <td><input type="text" value="{{ parameter.temperature }}" class="form-control"
-                                name="temperature"></td>
-                        <td><input type="text" value="{{ parameter.rainfall }}" class="form-control" name="rainfall">
+                        <td><input type="number" value="{{ parameter.p }}" class="form-control" name="p" required></td>
+                        <td><input type="number"value="{{ parameter.k }}" class="form-control" name="k" required></td>
+                        <td><input type="number" value="{{ parameter.temperature }}" class="form-control"
+                                name="temperature" required></td>
+                        <td><input type="number" value="{{ parameter.rainfall }}" class="form-control" name="rainfall"required>
                         </td>
-                        <td><input type="text" value="{{ parameter.humidity }}" class="form-control" name="humidity">
+                        <td><input type="number" value="{{ parameter.humidity }}" class="form-control" name="humidity"required>
                         </td>
-                        <td><input type="text" value="{{ parameter.ph }}" class="form-control" name="ph"></td>
-                        <td><button class="btn btn-danger remove-row">Remover</button></td>
+                        <td><input type="number" value="{{ parameter.ph }}" class="form-control" name="ph"required></td>
+                        <td><button class="btn btn-danger remove-row"required>Remover</button></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button id="executeButton" class="btn  btn-lg  btn-outline-success">Executar</button>
+                <button id="executeButton" class="btn  btn-lg  btn-outline-success">Executar</button>
             </div>
-    </div>
-    </form>
+        </form>
+    </main>
     <script>
-        // Adicionar nova linha
-        document.getElementById('addRow').addEventListener('click', function () {
+        // Function to add a new row to the table
+        function addNewRow() {
             const row = `
-        <tr>
-          <td><input type="text" class="form-control" name="p"></td>
-          <td><input type="text" class="form-control" name="k"></td>
-          <td><input type="text" class="form-control" name="temperature"></td>
-          <td><input type="text" class="form-control" name="rainfall"></td>
-          <td><input type="text" class="form-control" name="humidity"></td>
-          <td><input type="text" class="form-control" name="ph"></td>
-          <td><button class="btn btn-danger remove-row">Remover</button></td>
-        </tr>
-      `;
+                <tr>
+                    <td><input type="number" class="form-control" name="p"></td>
+                    <td><input type="number" class="form-control" name="k"></td>
+                    <td><input type="number" class="form-control" name="temperature"></td>
+                    <td><input type="number" class="form-control" name="rainfall"></td>
+                    <td><input type="number" class="form-control" name="humidity"></td>
+                    <td><input type="number" class="form-control" name="ph"></td>
+                    <td><button class="btn btn-danger remove-row">Remover</button></td>
+                </tr>
+            `;
             document.getElementById('inputRows').insertAdjacentHTML('beforeend', row);
-        });
+            updateTableDisplayStyle();
+        }
 
-        // Remover linha
-        document.addEventListener('click', function (event) {
+        // Function to remove a row from the table
+        function removeRow(event) {
             if (event.target.classList.contains('remove-row')) {
                 event.target.closest('tr').remove();
+                updateTableDisplayStyle();
             }
-        });
+        }
 
+        // Function to update input fields based on selected instance
         function updateInputFields() {
             const selectElement = document.getElementById('instanceSelect');
             const selectedInstanceId = selectElement.value;
 
             if (selectedInstanceId) {
-                // Get the instance data using Django's template variables
                 const instanceData = {
                     name: '{{ selected_instance.name }}',
-                    author: '{{ selected_instance.author }}',
-                    // Add other instance data fields here...
+                    author: '{{ selected_instance.author }}'
                 };
 
-                // Update the input fields with the instance data
                 document.getElementById('instanceName').value = instanceData.name;
                 document.getElementById('instanceAuthor').value = instanceData.author;
-                // Update other input fields with instance data...
             } else {
-                // Clear or reset the input fields
                 document.getElementById('instanceName').value = '';
                 document.getElementById('instanceAuthor').value = '';
-                // Clear or reset other input fields...
             }
         }
-        document.getElementById('loadInstanceButton').addEventListener('click', function () {
-            loadInstance();
-        });
 
+        // Function to update table display style
+        function updateTableDisplayStyle() {
+            const table = document.querySelector('.table');
+            const rowCount = table.querySelectorAll('tbody tr').length;
 
+            if (rowCount > 0) {
+                table.classList.add('table-scrollable');
+            } else {
+                table.classList.remove('table-scrollable');
+            }
+        }
+
+        // Initial call to update table display
+        updateTableDisplayStyle();
+
+        // Event listeners
+        document.getElementById('addRow').addEventListener('click', addNewRow);
+        document.addEventListener('click', removeRow);
     </script>
 
-    <!-- Include Bootstrap scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
