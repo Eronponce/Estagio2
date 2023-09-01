@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import PlantingInstance, PlantingParameters
 from django.http import HttpResponse
+import joblib
+import numpy as np
+from django.contrib import messages
+import os
+from django.conf import settings
 
+from django.shortcuts import render
 def save_parameters(request):
     if request.method == 'POST':
         instance_id = request.POST.get('instance')
-      
         instance_name = request.POST.get('instance_name')
         if instance_name == "":
             instance_name = "Instância sem nome"
@@ -19,34 +24,76 @@ def save_parameters(request):
         )
 
         PlantingParameters.objects.filter(instance=instance).delete()
-
+        
+        n_values = request.POST.getlist('n')
         p_values = request.POST.getlist('p')
         k_values = request.POST.getlist('k')
         temperature_values = request.POST.getlist('temperature')
-        rainfall_values = request.POST.getlist('rainfall')
         humidity_values = request.POST.getlist('humidity')
         ph_values = request.POST.getlist('ph')
-
-        for p, k, temperature, rainfall, humidity, ph in zip(
-            p_values, k_values, temperature_values, rainfall_values, humidity_values, ph_values
+        rainfall_values = request.POST.getlist('rainfall')
+        for n, p, k, temperature, humidity, ph, rainfall in zip(
+            n_values, p_values, k_values, temperature_values,
+            humidity_values, ph_values, rainfall_values,
         ):
-            if p and k and temperature and rainfall and humidity and ph:  
+            if n and p and k and temperature and humidity and ph and rainfall: 
                 try:
                     parameters = PlantingParameters(
                         instance=instance,
+                        n=float(n),
                         p=float(p),
                         k=float(k),
                         temperature=float(temperature),
-                        rainfall=float(rainfall),
                         humidity=float(humidity),
-                        ph=float(ph)
+                        ph=float(ph),
+                        rainfall=float(rainfall)
                     )
                     parameters.save()
                 except ValueError:
                     pass
+        print("POST data: ", request.POST)
+        if 'execute_algorithm' in request.POST:
+            print("Executing algorithm...")
+            average_n = sum([float(n) for n in n_values]) / len(n_values)
+            average_p = sum([float(p) for p in p_values]) / len(p_values)
+            average_k = sum([float(k) for k in k_values]) / len(k_values)
+            average_temperature = sum([float(temperature) for temperature in temperature_values]) / len(temperature_values)
+            average_humidity = sum([float(humidity) for humidity in humidity_values]) / len(humidity_values)
+            average_ph = sum([float(ph) for ph in ph_values]) / len(ph_values)
+            average_rainfall = sum([float(rainfall) for rainfall in rainfall_values]) / len(rainfall_values)
+            
+            average_values = [
+                average_n, average_p, average_k, average_temperature, average_humidity, average_ph, average_rainfall
+            ]
+        
+            model_path = os.path.join(settings.BASE_DIR,"train_algorithm/trained_models")  # Use settings.model_path
+    
+            # Load all models from the specified directory
+            model_files = os.listdir(model_path)
+            models = [joblib.load(os.path.join(model_path, model_file)) for model_file in model_files]
 
-    return redirect('algorithm')
+            predictions_info = []
 
+            for idx, loaded_model in enumerate(models):
+                prediction = loaded_model.predict(np.array([average_values]))
+
+                try:
+                    confidence = loaded_model.predict_proba(np.array([average_values]))
+                    max_confidence = np.max(confidence)
+                except AttributeError:
+                    max_confidence = "N/A"
+
+                predictions_info.append({
+                    'model_number': idx + 1,
+                    'prediction': prediction,
+                    'max_confidence': max_confidence
+                })
+
+            print(predictions_info)
+                       
+    return redirect(f'/load_instance/?instance_id={instance.id}')
+    
+    
 
 def algorithm(request):
     instances = PlantingInstance.objects.all()
@@ -54,6 +101,7 @@ def algorithm(request):
 
 
 def load_instance(request):
+    
     instance_id = request.GET.get('instance_id')
     if instance_id == "":
         return redirect('algorithm')
@@ -65,8 +113,11 @@ def load_instance(request):
     if 'delete_instance' in request.GET:
         # Delete the instance and its parameters
         instance.delete()
+        messages.error(request, 'Instance deleted successfully.')
         return redirect('algorithm')
-
-    return render(request, "algorithm/algorithm.html", {'instances': instances,'instance': instance, 'parameters': parameters})
+    
+    messages.success(request, 'Parameters loaded successfully.')
+    return render(request, "algorithm/algorithm.html", {'instances': instances,
+    'instance': instance, 'parameters': parameters})
 
 

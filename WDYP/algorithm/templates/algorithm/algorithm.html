@@ -10,6 +10,21 @@
     <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
     <style>
+        .closebtn {
+            margin-left: 15px;
+            color: #000;
+            font-weight: bold;
+            float: right;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .closebtn:hover {
+            color: black;
+        }
+
         .logo {
             width: 75px;
             margin-left: 20px;
@@ -73,10 +88,63 @@
                 font-size: 1.5rem;
             }
         }
+
+        /* Customizing the success message */
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .messages {
+            position: fixed;
+            /* Use fixed instead of absolute to keep it at the top even when scrolling */
+            top: 0;
+            /* Stick it to the top */
+            left: 0;
+            /* Stick it to the left */
+            right: 0;
+            /* Stretch it all the way to the right */
+            z-index: 1000;
+            /* Make sure it appears on top */
+            text-align: center;
+            /* Center the messages */
+        }
+
+        /* Customizing the error message */
+        .alert-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Customizing the info message */
+        .alert-info {
+            background-color: #cce5ff;
+            border-color: #b8daff;
+            color: #004085;
+        }
+
+        /* Customizing the warning message */
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
     </style>
 </head>
 
 <body>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <header class="header">
         <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
         <h1 id="main-title">What do <b>you</b> plant?</h1>
@@ -120,12 +188,13 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th>N</th>
                         <th>P</th>
                         <th>K</th>
                         <th>Temperatura C°</th>
-                        <th>Chuva</th>
                         <th>Umidade</th>
                         <th>pH</th>
+                        <th>Chuva</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -133,36 +202,56 @@
                     <!-- Linhas de entrada serão adicionadas aqui dinamicamente -->
                     {% for parameter in parameters %}
                     <tr>
+                        <td><input type="number" value="{{ parameter.n }}" class="form-control" name="n" required></td>
                         <td><input type="number" value="{{ parameter.p }}" class="form-control" name="p" required></td>
-                        <td><input type="number"value="{{ parameter.k }}" class="form-control" name="k" required></td>
+                        <td><input type="number" value="{{ parameter.k }}" class="form-control" name="k" required></td>
                         <td><input type="number" value="{{ parameter.temperature }}" class="form-control"
                                 name="temperature" required></td>
-                        <td><input type="number" value="{{ parameter.rainfall }}" class="form-control" name="rainfall"required>
+                        <td><input type="number" value="{{ parameter.humidity }}" class="form-control" name="humidity"
+                                required>
                         </td>
-                        <td><input type="number" value="{{ parameter.humidity }}" class="form-control" name="humidity"required>
+                        <td><input type="number" value="{{ parameter.ph }}" class="form-control" name="ph" required>
                         </td>
-                        <td><input type="number" value="{{ parameter.ph }}" class="form-control" name="ph"required></td>
-                        <td><button class="btn btn-danger remove-row"required>Remover</button></td>
+                        <td><input type="number" value="{{ parameter.rainfall }}" class="form-control" name="rainfall"
+                                required>
+                        </td>
+
+
+                        <td><button class="btn btn-danger remove-row" required>Remover</button></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button id="executeButton" class="btn  btn-lg  btn-outline-success">Executar</button>
+                <button type="submit" class="btn btn-primary submit-button" name="execute_algorithm" value="true">Executar
+                    Algoritmo</button>
             </div>
         </form>
     </main>
     <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            // Automatically close the alert after 5 seconds (5000 milliseconds)
+            setTimeout(closeAlerts, 5000);
+        });
+
+        function closeAlerts() {
+            let alerts = document.querySelectorAll('.alert');
+            alerts.forEach((alert) => {
+                alert.style.display = 'none';
+            });
+        }
+
         // Function to add a new row to the table
         function addNewRow() {
             const row = `
                 <tr>
+                    <td><input type="number" class="form-control" name="n"></td>
                     <td><input type="number" class="form-control" name="p"></td>
                     <td><input type="number" class="form-control" name="k"></td>
                     <td><input type="number" class="form-control" name="temperature"></td>
-                    <td><input type="number" class="form-control" name="rainfall"></td>
                     <td><input type="number" class="form-control" name="humidity"></td>
                     <td><input type="number" class="form-control" name="ph"></td>
+                    <td><input type="number" class="form-control" name="rainfall"></td>
                     <td><button class="btn btn-danger remove-row">Remover</button></td>
                 </tr>
             `;
