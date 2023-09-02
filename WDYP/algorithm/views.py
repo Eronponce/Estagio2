@@ -6,8 +6,10 @@ import numpy as np
 from django.contrib import messages
 import os
 from django.conf import settings
-
+import pandas as pd
 from django.shortcuts import render
+from sklearn.preprocessing import MinMaxScaler
+
 def save_parameters(request):
     if request.method == 'POST':
         instance_id = request.POST.get('instance')
@@ -65,9 +67,23 @@ def save_parameters(request):
             average_values = [
                 average_n, average_p, average_k, average_temperature, average_humidity, average_ph, average_rainfall
             ]
-        
+            
+           
             model_path = os.path.join(settings.BASE_DIR,"train_algorithm/trained_models")  # Use settings.model_path
-    
+
+            csv_path = os.path.join(settings.BASE_DIR,"train_algorithm/Crop_recommendation.csv")  # Use settings.csv_path
+
+            df = pd.read_csv(csv_path)
+            X = df.drop('label', axis=1)
+
+            scaler = MinMaxScaler()
+            scaler.fit(X)
+            print("Average values: ", average_values)
+            average_values_reshaped = [average_values]
+            normalized_average_values = scaler.transform(average_values_reshaped)
+            
+
+            print("Normalized average values: ", normalized_average_values)
             # Load all models from the specified directory
             model_files = os.listdir(model_path)
             models = [joblib.load(os.path.join(model_path, model_file)) for model_file in model_files]
@@ -75,10 +91,11 @@ def save_parameters(request):
             predictions_info = []
 
             for idx, loaded_model in enumerate(models):
-                prediction = loaded_model.predict(np.array([average_values]))
-
+                prediction = loaded_model.predict(np.array(normalized_average_values))
+                algorithm_name = loaded_model.__class__.__name__ 
                 try:
-                    confidence = loaded_model.predict_proba(np.array([average_values]))
+                    confidence = loaded_model.predict_proba(np.array(normalized_average_values))
+                    print("Confidence: ", confidence)
                     max_confidence = np.max(confidence)
                 except AttributeError:
                     max_confidence = "N/A"
@@ -86,11 +103,12 @@ def save_parameters(request):
                 predictions_info.append({
                     'model_number': idx + 1,
                     'prediction': prediction,
-                    'max_confidence': max_confidence
+                    'max_confidence': max_confidence,
+                    'algorithm_name': algorithm_name
                 })
-
+            
             print(predictions_info)
-                       
+            return render(request, "algorithm/algorithm.html", {'predictions_info': predictions_info, 'instance': instance})
     return redirect(f'/load_instance/?instance_id={instance.id}')
     
     
@@ -101,7 +119,6 @@ def algorithm(request):
 
 
 def load_instance(request):
-    
     instance_id = request.GET.get('instance_id')
     if instance_id == "":
         return redirect('algorithm')

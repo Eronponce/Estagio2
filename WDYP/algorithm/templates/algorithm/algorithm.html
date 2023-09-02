@@ -227,6 +227,25 @@
                     Algoritmo</button>
             </div>
         </form>
+        <h3>Prediction Information</h3>
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Model Number</th>
+              <th>Prediction</th>
+              <th>Max Confidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prediction in predictions_info %}
+            <tr>
+              <td>{{ prediction.algorithm_name }}</td>
+              <td>{{ prediction.prediction.0 }}</td> <!-- Assuming 'prediction' is a one-element array -->
+              <td>{{ prediction.max_confidence }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
     </main>
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
