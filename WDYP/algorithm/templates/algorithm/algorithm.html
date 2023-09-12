@@ -41,7 +41,13 @@
         .btn-transition {
             transition: background-color 0.3s, border-color 0.3s;
         }
-
+        
+        #image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
         .table {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             color: black;
@@ -256,13 +262,13 @@
                     Algoritmo</button>
             </div>
         </form>
-        <h3>Prediction Information</h3>
+        <h3>Informação de predição</h3>
         <table border="1">
             <thead>
                 <tr>
-                    <th>Model Number</th>
-                    <th>Prediction</th>
-                    <th>Max Confidence</th>
+                    <th>Nome do modelo</th>
+                    <th>Predição</th>
+                    <th>Confiança máxima</th>
                     <th>acuracia</th>
                 </tr>
             </thead>
@@ -270,7 +276,7 @@
                 {% for prediction in predictions_info %}
                 <tr>
                     <td>{{ prediction.algorithm_name }}</td>
-                    <td>{{ prediction.prediction.0 }}</td> <!-- Assuming 'prediction' is a one-element array -->
+                    <td>{{ prediction.prediction.0 }}</td> 
                     <td>{{ prediction.max_confidence }}</td>
                     <td>{{ prediction.accuracy }}</td>
 
@@ -305,8 +311,24 @@
             </tbody>
         </table>
         
+        <div id="image-container">
+          
+            <!-- Images will be loaded here -->
+        </div>
     </main>
     <script>
+        const models = ["logistic_regression", "random_forest", "svm_rbf", "decision_tree", "gradient_boosting", "knn_euclidean", "naive_bayes", "linear_discriminant_analysis", "adaboost", "mlp_neural_network"];
+        const container = document.getElementById("image-container");
+
+        // Loop through each model and create an image element
+        models.forEach(model => {
+            const img = document.createElement("img");
+            img.src = `/static/confusion_matrix/${model}_confusion_matrix.png`;
+            console.log(img.src)
+            img.alt = model;
+            img.style.width = "50%";  
+            container.appendChild(img);
+        });
         window.addEventListener('DOMContentLoaded', (event) => {
             // Automatically close the alert after 5 seconds (5000 milliseconds)
             setTimeout(closeAlerts, 5000);
