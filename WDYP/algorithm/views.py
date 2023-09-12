@@ -1,14 +1,31 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import PlantingInstance, PlantingParameters
-from django.http import HttpResponse
+from .models import PlantingInstance, PlantingParameters, PredictionInfo, FormattedVariationKNN
 import joblib
 import numpy as np
 from django.contrib import messages
-import os
 from django.conf import settings
 import pandas as pd
-from django.shortcuts import render
+from sklearn.preprocessing import StandardScaler
+from sklearn import neighbors
 from sklearn.preprocessing import MinMaxScaler
+import os
+import pandas as pd
+from sklearn.metrics import accuracy_score
+from sklearn import model_selection
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import MinMaxScaler
+from joblib import dump
+import json
+
 
 def save_parameters(request):
     if request.method == 'POST':
@@ -53,8 +70,16 @@ def save_parameters(request):
                     parameters.save()
                 except ValueError:
                     pass
-        print("POST data: ", request.POST)
+        
         if 'execute_algorithm' in request.POST:
+          
+
+            try:
+                with open(os.path.join(settings.BASE_DIR, "train_algorithm", "model_accuracies.json"), "r") as f:
+                    model_accuracies = json.load(f)
+            except Exception as e:
+                print(f"Could not load model accuracies. Error: {e}")
+                model_accuracies = {}
             print("Executing algorithm...")
             average_n = sum([float(n) for n in n_values]) / len(n_values)
             average_p = sum([float(p) for p in p_values]) / len(p_values)
@@ -70,20 +95,18 @@ def save_parameters(request):
             
            
             model_path = os.path.join(settings.BASE_DIR,"train_algorithm/trained_models")  # Use settings.model_path
-
-            csv_path = os.path.join(settings.BASE_DIR,"train_algorithm/Crop_recommendation.csv")  # Use settings.csv_path
-
+            csv_path = os.path.join(settings.BASE_DIR,"train_algorithm", "Crop_recommendation.csv")  # Use settings.csv_path
+           
             df = pd.read_csv(csv_path)
             X = df.drop('label', axis=1)
 
             scaler = MinMaxScaler()
             scaler.fit(X)
-            print("Average values: ", average_values)
+            
             average_values_reshaped = [average_values]
             normalized_average_values = scaler.transform(average_values_reshaped)
             
 
-            print("Normalized average values: ", normalized_average_values)
             # Load all models from the specified directory
             model_files = os.listdir(model_path)
             models = [joblib.load(os.path.join(model_path, model_file)) for model_file in model_files]
@@ -92,10 +115,30 @@ def save_parameters(request):
 
             for idx, loaded_model in enumerate(models):
                 prediction = loaded_model.predict(np.array(normalized_average_values))
-                algorithm_name = loaded_model.__class__.__name__ 
+                algorithm_name = loaded_model.__class__.__name__
+                name_mapping = {
+                    'LogisticRegression': 'Logistic Regression',
+                    'RandomForestClassifier': 'Random Forest',
+                    'SVC': 'SVM_RBF',
+                    'DecisionTreeClassifier': 'Decision Tree',
+                    'GradientBoostingClassifier': 'Gradient Boosting',
+                    'KNeighborsClassifier': 'KNN_Euclidean',
+                    'GaussianNB': 'Naive Bayes',
+                    'LinearDiscriminantAnalysis': 'Linear Discriminant Analysis',
+                    'AdaBoostClassifier': 'AdaBoost',
+                    'MLPClassifier': 'MLP Neural Network'
+                }
+
+                try:
+                    with open(os.path.join(settings.BASE_DIR, "train_algorithm", "model_accuracies.json"), "r") as f:
+                        model_accuracies = json.load(f)
+                except Exception as e:
+                    print(f"Could not load model accuracies. Error: {e}")
+                    model_accuracies = {}
+                mapped_name = name_mapping.get(algorithm_name, algorithm_name)
+                accuracy = model_accuracies.get(mapped_name, "N/A")
                 try:
                     confidence = loaded_model.predict_proba(np.array(normalized_average_values))
-                    print("Confidence: ", confidence)
                     max_confidence = np.max(confidence)
                 except AttributeError:
                     max_confidence = "N/A"
@@ -103,12 +146,49 @@ def save_parameters(request):
                 predictions_info.append({
                     'model_number': idx + 1,
                     'prediction': prediction,
-                    'max_confidence': max_confidence,
-                    'algorithm_name': algorithm_name
+                    'max_confidence': format(max_confidence, ".2f"),
+                    'algorithm_name': algorithm_name,
+                    'accuracy': format(accuracy, ".2f")  
                 })
+            instances = PlantingInstance.objects.all()
+            parameters = PlantingParameters.objects.filter(instance=instance)
+            sc_x = StandardScaler()
+            sc_x.fit(X)
+
+            knn_classifier = neighbors.KNeighborsClassifier(n_neighbors=19, metric='euclidean')
+            knn_classifier.fit(sc_x.transform(X), df['label'])
+
+
+            scaled_average_values = sc_x.transform(pd.DataFrame([average_values], columns=X.columns))
+
+            prediction_knn = knn_classifier.predict(scaled_average_values)
+            mean_values_knn = df[df['label'] == prediction_knn[0]].mean(numeric_only=True)
+            scaled_mean_values_knn = sc_x.transform(pd.DataFrame([mean_values_knn.values], columns=X.columns))
+            variation_knn = np.abs(scaled_average_values - scaled_mean_values_knn)
+            rounded_variation_knn = np.around(variation_knn, 1)
+            formatted_variation_knn = [[f"{x:.1f}" for x in row] for row in rounded_variation_knn]
+            print("prediction info", predictions_info)
+            print("instance", instance)
+            print("parameters", parameters)
+            print("formatted_variation_knn", formatted_variation_knn)
             
-            print(predictions_info)
-            return render(request, "algorithm/algorithm.html", {'predictions_info': predictions_info, 'instance': instance})
+            PredictionInfo.objects.filter(instance=instance).delete()
+            for pred_info in predictions_info:
+                PredictionInfo.objects.create(
+                    instance=instance,
+                    model_number=pred_info['model_number'],
+                    prediction=pred_info['prediction'][0],  # assuming prediction is an array
+                    max_confidence=float(pred_info['max_confidence']),
+                    algorithm_name=pred_info['algorithm_name'],
+                    accuracy=float(pred_info['accuracy'])
+                )
+            FormattedVariationKNN.objects.filter(instance=instance).delete()
+            formatted_variation_str = ','.join(formatted_variation_knn[0])  # assuming formatted_variation_knn is a 2D array
+            FormattedVariationKNN.objects.create(
+                instance=instance,
+                variation=formatted_variation_str
+            )
+            return render(request, "algorithm/algorithm.html", {'instances': instances,'predictions_info': predictions_info, 'instance': instance ,'parameters' : parameters,'variations': formatted_variation_knn})
     return redirect(f'/load_instance/?instance_id={instance.id}')
     
     
@@ -118,23 +198,102 @@ def algorithm(request):
     return render(request, "algorithm/algorithm.html", {'instances': instances})
 
 
+
 def load_instance(request):
     instance_id = request.GET.get('instance_id')
     if instance_id == "":
         return redirect('algorithm')
+    
     instances = PlantingInstance.objects.all()
     instance = get_object_or_404(PlantingInstance, id=instance_id)
     parameters = PlantingParameters.objects.filter(instance=instance)
-    # Render the template with the instance and its parameters
+    predictions = PredictionInfo.objects.filter(instance=instance)
+    formatted_variation = FormattedVariationKNN.objects.filter(instance=instance).first()
 
     if 'delete_instance' in request.GET:
-        # Delete the instance and its parameters
         instance.delete()
         messages.error(request, 'Instance deleted successfully.')
         return redirect('algorithm')
     
     messages.success(request, 'Parameters loaded successfully.')
-    return render(request, "algorithm/algorithm.html", {'instances': instances,
-    'instance': instance, 'parameters': parameters})
+
+    return render(request, "algorithm/algorithm.html", {
+        'instances': instances,
+        'instance': instance,
+        'parameters': parameters,
+        'predictions': predictions,
+        'formatted_variation': formatted_variation.variation if formatted_variation else None
+    })
+
+
+def train(request):
+    # Reading and inspecting the data
+    model_path = os.path.join(settings.BASE_DIR,"train_algorithm/trained_models")  # Use settings.model_path
+    csv_path = os.path.join(settings.BASE_DIR,"train_algorithm", "Crop_recommendation.csv")  # Use settings.csv_path
+    df = pd.read_csv(csv_path)
+
+    # Extracting features and labels
+    x = df.drop(columns=['label'])
+    y = df['label']
+
+    # Splitting the data into training and test sets
+    x_train, x_test, y_train, y_test = model_selection.train_test_split(x, y, test_size=0.3, shuffle=True, random_state=0)
+
+    scaler = MinMaxScaler()
+    x_train = scaler.fit_transform(x_train)
+    x_test = scaler.transform(x_test)
+
+    # Define models
+    models = [
+        ('Logistic Regression', LogisticRegression()),
+        ('Random Forest', RandomForestClassifier()),
+        ('SVM_RBF', SVC(probability=True)),
+        ('Decision Tree', DecisionTreeClassifier()),
+        ('Gradient Boosting', GradientBoostingClassifier()),
+        ('KNN_Euclidean', KNeighborsClassifier(n_neighbors=19, metric='euclidean')),
+        ('Naive Bayes', GaussianNB()),
+        ('Linear Discriminant Analysis', LinearDiscriminantAnalysis()),
+        ('AdaBoost', AdaBoostClassifier()),
+        ('MLP Neural Network', MLPClassifier(max_iter=500))
+    ]
+    if os.path.exists(model_path):
+        # Delete all files in directory
+        for filename in os.listdir(model_path):
+            file_path = os.path.join(model_path, filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(f'Failed to delete {file_path}. Reason: {e}')
+
+    # Train and save models
+    model_accuracies = {}  # to store model accuracies
+
+    # Train and save models
+    for name, model in models:
+        try:
+            print(f"Training {name}...")
+            
+            model.fit(x_train, y_train)
+            
+            # Calculate accuracy
+            y_pred = model.predict(x_test)
+            accuracy = accuracy_score(y_test, y_pred)
+            model_accuracies[name] = accuracy  # save accuracy
+            
+            print(f"Accuracy of {name}: {accuracy * 100:.2f}%")
+            
+            model_path = os.path.join(settings.BASE_DIR, "train_algorithm", "trained_models", f"{name.replace(' ', '_').lower()}_model.joblib")
+            dump(model, model_path)
+        except Exception as e:
+            messages.error(request, f"Could not train {name}. Error: {e}")
+
+    # Save model accuracies to a JSON file
+    with open(os.path.join(settings.BASE_DIR, "train_algorithm", "model_accuracies.json"), "w") as f:
+        json.dump(model_accuracies, f)
+    messages.success(request, "Trained models")
+    return redirect('algorithm')
+
+
 
 

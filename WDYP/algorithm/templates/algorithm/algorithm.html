@@ -131,6 +131,26 @@
             border-color: #ffeeba;
             color: #856404;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 </head>
 
@@ -146,11 +166,19 @@
     </div>
     {% endif %}
     <header class="header">
-        <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
+        <a href="{% url 'algorithm' %}">
+            <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
+        </a>
         <h1 id="main-title">What do <b>you</b> plant?</h1>
     </header>
+    <form method="post" action="{% url 'train' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Treinar modelo</button>
+    </form>
     <main class="container mt-5">
-        <!-- Instance Loading Section -->
+
+
+
         <form method="get" action="{% url 'load_instance' %}">
             {% csrf_token %}
             <div class="input-group mb-3">
@@ -223,29 +251,60 @@
                 </tbody>
             </table>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button type="submit" class="btn btn-primary submit-button" name="execute_algorithm" value="true">Executar
+                <button type="submit" class="btn btn-primary submit-button" name="execute_algorithm"
+                    value="true">Executar
                     Algoritmo</button>
             </div>
         </form>
         <h3>Prediction Information</h3>
         <table border="1">
-          <thead>
-            <tr>
-              <th>Model Number</th>
-              <th>Prediction</th>
-              <th>Max Confidence</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for prediction in predictions_info %}
-            <tr>
-              <td>{{ prediction.algorithm_name }}</td>
-              <td>{{ prediction.prediction.0 }}</td> <!-- Assuming 'prediction' is a one-element array -->
-              <td>{{ prediction.max_confidence }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
+            <thead>
+                <tr>
+                    <th>Model Number</th>
+                    <th>Prediction</th>
+                    <th>Max Confidence</th>
+                    <th>acuracia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in predictions_info %}
+                <tr>
+                    <td>{{ prediction.algorithm_name }}</td>
+                    <td>{{ prediction.prediction.0 }}</td> <!-- Assuming 'prediction' is a one-element array -->
+                    <td>{{ prediction.max_confidence }}</td>
+                    <td>{{ prediction.accuracy }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
+        <table border="1">
+            <caption>Variação em Z-score: Quantos desvios padrão um valor específico está em relação à média da amostra.</caption>
+            <caption>A variação está sendo considerada com o modelo KNN</caption>
+            <thead>
+                <tr>
+                    <th>Parâmetro</th>
+                    <th>N</th>
+                    <th>P</th>
+                    <th>K</th>
+                    <th>Temperatura C°</th>
+                    <th>Umidade</th>
+                    <th>pH</th>
+                    <th>Chuva</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in variations %}
+                <tr>
+                    <td>Z-score</td>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
     </main>
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
