@@ -7,7 +7,6 @@ from django.conf import settings
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn import neighbors
-from sklearn.preprocessing import MinMaxScaler
 import os
 import pandas as pd
 from sklearn.metrics import accuracy_score
@@ -21,7 +20,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import MinMaxScaler
 from joblib import dump
 import json
@@ -290,6 +288,7 @@ def train(request):
             plt.ylabel('True label')
             plt.xlabel('Predicted label')
             plt.title(title)
+            plt.tight_layout()
             print(image_path)
             plt.savefig(image_path)
             plt.close()
