@@ -1,0 +1,145 @@
+.closebtn {
+  margin-left: 15px;
+  color: #000;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.closebtn:hover {
+  color: black;
+}
+
+.logo {
+  width: 75px;
+  margin-left: 20px;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+}
+
+.rounded-box {
+  border-radius: 10px;
+}
+
+.btn-transition {
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+#image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.table {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: black;
+  text-align: center;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.table-scrollable {
+  overflow-y: auto;
+  max-height: 400px;
+  display: block;
+}
+
+header {
+  background-color: #ff9522;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+header h1 {
+  flex-grow: 1;
+  text-align: center;
+}
+
+select {
+  background-color: #494368;
+  color: white;
+}
+
+.form-control {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Customizing the success message */
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.messages {
+  position: fixed;
+  /* Use fixed instead of absolute to keep it at the top even when scrolling */
+  top: 0;
+  /* Stick it to the top */
+  left: 0;
+  /* Stick it to the left */
+  right: 0;
+  /* Stretch it all the way to the right */
+  z-index: 1000;
+  /* Make sure it appears on top */
+  text-align: center;
+  /* Center the messages */
+}
+
+/* Customizing the error message */
+.alert-error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Customizing the info message */
+.alert-info {
+  background-color: #cce5ff;
+  border-color: #b8daff;
+  color: #004085;
+}
+
+/* Customizing the warning message */
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  color: #856404;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}

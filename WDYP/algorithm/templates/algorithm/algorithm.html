@@ -1,295 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'html/base.html' %}
 {% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WDYP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    <style>
-        .closebtn {
-            margin-left: 15px;
-            color: #000;
-            font-weight: bold;
-            float: right;
-            font-size: 22px;
-            line-height: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% endblock %}
 
-        .closebtn:hover {
-            color: black;
-        }
+{% block content %}
 
-        .logo {
-            width: 75px;
-            margin-left: 20px;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-        }
-
-        .rounded-box {
-            border-radius: 10px;
-        }
-
-        .btn-transition {
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-        
-        #image-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .table {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            color: black;
-            text-align: center;
-            overflow-y: auto;
-            max-height: 400px;
-        }
-
-        .table-scrollable {
-            overflow-y: auto;
-            max-height: 400px;
-            display: block;
-        }
-
-        header {
-            background-color: #FF9522;
-            padding: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        header h1 {
-            flex-grow: 1;
-            text-align: center;
-        }
-
-
-
-        select {
-            background-color: #494368;
-            color: white;
-        }
-
-        .form-control {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-        }
-
-        /* Customizing the success message */
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-
-        .messages {
-            position: fixed;
-            /* Use fixed instead of absolute to keep it at the top even when scrolling */
-            top: 0;
-            /* Stick it to the top */
-            left: 0;
-            /* Stick it to the left */
-            right: 0;
-            /* Stretch it all the way to the right */
-            z-index: 1000;
-            /* Make sure it appears on top */
-            text-align: center;
-            /* Center the messages */
-        }
-
-        /* Customizing the error message */
-        .alert-error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-
-        /* Customizing the info message */
-        .alert-info {
-            background-color: #cce5ff;
-            border-color: #b8daff;
-            color: #004085;
-        }
-
-        /* Customizing the warning message */
-        .alert-warning {
-            background-color: #fff3cd;
-            border-color: #ffeeba;
-            color: #856404;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-    </style>
-</head>
-
-<body>
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
-            <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-            {{ message }}
-        </div>
-        {% endfor %}
+{% if messages %}S
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}" role="alert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {{ message }}
     </div>
-    {% endif %}
-    <header class="header">
-        <a href="{% url 'algorithm' %}">
-            <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
-        </a>
-        <h1 id="main-title">What do <b>you</b> plant?</h1>
-    </header>
-    <form method="post" action="{% url 'train' %}">
+    {% endfor %}
+</div>
+{% endif %}
+
+<form method="post" action="{% url 'train' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Treinar modelo</button>
+</form>
+<main class="container mt-5">
+
+
+
+    <form method="get" action="{% url 'load_instance' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Treinar modelo</button>
-    </form>
-    <main class="container mt-5">
-
-
-
-        <form method="get" action="{% url 'load_instance' %}">
-            {% csrf_token %}
-            <div class="input-group mb-3">
-                <button type="submit" class="btn btn-secondary" id="loadInstanceButton"
-                    aria-label="Load Instance">Carregar Instância</button>
-                <select id="instanceSelect" class="form-select" name="instance_id" aria-labelledby="main-title">
-                    <option value="">Selecionar</option>
-                    {% for instance in instances %}
-                    <option value="{{ instance.id }}">{{ instance.name }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" name="delete_instance" value="{{ instance.id }}" class="btn btn-danger"
-                    aria-label="Delete Instance">Deletar Instância</button>
-            </div>
-        </form>
-        <form method="post" action="{% url 'save_parameters' %}">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="instanceName" class="form-label">Nome da Instância:</label>
-                    <input type="text" class="form-control" value="{{ instance.name }}" id="instanceName"
-                        name="instance_name" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="instanceAuthor" class="form-label">Autor:</label>
-                    <input type="text" class="form-control" value="{{ instance.author }}" id="instanceAuthor"
-                        name="instance_author" required>
-                </div>
-            </div>
-            <div class="d-flex justify-content-between mb-3">
-                <h2>Valores de Entrada</h2>
-                <button type="button" id="addRow" class="btn btn-success">Adicionar Linha</button>
-            </div>
-            <button type="submit" class="btn btn-primary submit-button">Salvar Parâmetros</button>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>N</th>
-                        <th>P</th>
-                        <th>K</th>
-                        <th>Temperatura C°</th>
-                        <th>Umidade</th>
-                        <th>pH</th>
-                        <th>Chuva</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="inputRows">
-                    <!-- Linhas de entrada serão adicionadas aqui dinamicamente -->
-                    {% for parameter in parameters %}
-                    <tr>
-                        <td><input type="number" step="0.01" value="{{ parameter.n }}" class="form-control" name="n" required></td>
-                        <td><input type="number" step="0.01" value="{{ parameter.p }}" class="form-control" name="p" required></td>
-                        <td><input type="number" step="0.01" value="{{ parameter.k }}" class="form-control" name="k" required></td>
-                        <td><input type="number"  step="0.01"value="{{ parameter.temperature }}" class="form-control"
-                                name="temperature" required></td>
-                        <td><input type="number"  step="0.01"value="{{ parameter.humidity }}" class="form-control" name="humidity"
-                                required>
-                        </td>
-                        <td><input type="number"  step="0.01"value="{{ parameter.ph }}" class="form-control" name="ph" required>
-                        </td>
-                        <td><input type="number" step="0.01" value="{{ parameter.rainfall }}" class="form-control" name="rainfall"
-                                required>
-                        </td>
-
-
-                        <td><button class="btn btn-danger remove-row" required>Remover</button></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button type="submit" class="btn btn-primary submit-button" name="execute_algorithm"
-                    value="true">Executar
-                    Algoritmo</button>
-            </div>
-        </form>
-        <h3>Informação de predição</h3>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Nome do modelo</th>
-                    <th>Predição</th>
-                    <th>Confiança máxima</th>
-                    <th>Acuracia</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for prediction in predictions_info %}
-                <tr>
-                    <td>{{ prediction.algorithm_name }}</td>
-                    <td>{{ prediction.prediction.0 }}</td> 
-                    <td>{{ prediction.max_confidence }}</td>
-                    <td>{{ prediction.accuracy }}</td>
-
-                </tr>
+        <div class="input-group mb-3">
+            <button type="submit" class="btn btn-secondary" id="loadInstanceButton" aria-label="Load Instance">Carregar
+                Instância</button>
+            <select id="instanceSelect" class="form-select" name="instance_id" aria-labelledby="main-title">
+                <option value="">Selecionar</option>
+                {% for instance in instances %}
+                <option value="{{ instance.id }}">{{ instance.name }}</option>
                 {% endfor %}
-            </tbody>
-        </table>
-        <table border="1">
-            <caption>Variação em Z-score: Quantos desvios padrão um valor específico está em relação à média da amostra.</caption>
-            <caption>A variação está sendo considerada com o modelo KNN</caption>
+            </select>
+            <button type="submit" name="delete_instance" value="{{ instance.id }}" class="btn btn-danger"
+                aria-label="Delete Instance">Deletar Instância</button>
+        </div>
+    </form>
+    <form method="post" action="{% url 'save_parameters' %}">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="instanceName" class="form-label">Nome da Instância:</label>
+                <input type="text" class="form-control" value="{{ instance.name }}" id="instanceName"
+                    name="instance_name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="instanceAuthor" class="form-label">Autor:</label>
+                <input type="text" class="form-control" value="{{ instance.author }}" id="instanceAuthor"
+                    name="instance_author" required>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+            <h2>Valores de Entrada</h2>
+            <button type="button" id="addRow" class="btn btn-success">Adicionar Linha</button>
+        </div>
+        <button type="submit" class="btn btn-primary submit-button">Salvar Parâmetros</button>
+        <table class="table">
             <thead>
                 <tr>
-                    <th>Parâmetro</th>
                     <th>N</th>
                     <th>P</th>
                     <th>K</th>
@@ -297,116 +70,99 @@
                     <th>Umidade</th>
                     <th>pH</th>
                     <th>Chuva</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for row in variations %}
+            <tbody id="inputRows">
+                <!-- Linhas de entrada serão adicionadas aqui dinamicamente -->
+                {% for parameter in parameters %}
                 <tr>
-                    <td>Z-score</td>
-                    {% for cell in row %}
-                    <td>{{ cell }}</td>
-                    {% endfor %}
+                    <td><input type="number" step="0.01" value="{{ parameter.n }}" class="form-control" name="n"
+                            required></td>
+                    <td><input type="number" step="0.01" value="{{ parameter.p }}" class="form-control" name="p"
+                            required></td>
+                    <td><input type="number" step="0.01" value="{{ parameter.k }}" class="form-control" name="k"
+                            required></td>
+                    <td><input type="number" step="0.01" value="{{ parameter.temperature }}" class="form-control"
+                            name="temperature" required></td>
+                    <td><input type="number" step="0.01" value="{{ parameter.humidity }}" class="form-control"
+                            name="humidity" required>
+                    </td>
+                    <td><input type="number" step="0.01" value="{{ parameter.ph }}" class="form-control" name="ph"
+                            required>
+                    </td>
+                    <td><input type="number" step="0.01" value="{{ parameter.rainfall }}" class="form-control"
+                            name="rainfall" required>
+                    </td>
+
+
+                    <td><button class="btn btn-danger remove-row" required>Remover</button></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        
-        <div id="image-container">
-          
-            <!-- Images will be loaded here -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="submit" class="btn btn-primary submit-button" name="execute_algorithm" value="true">Executar
+                Algoritmo</button>
         </div>
-    </main>
-    <script>
-        const models = ["logistic_regression", "random_forest", "svm_rbf", "decision_tree", "gradient_boosting", "knn_euclidean", "naive_bayes", "linear_discriminant_analysis", "adaboost", "mlp_neural_network"];
-        const container = document.getElementById("image-container");
+    </form>
+    <h3>Informação de predição</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Nome do modelo</th>
+                <th>Predição</th>
+                <th>Confiança máxima</th>
+                <th>Acuracia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prediction in predictions_info %}
+            <tr>
+                <td>{{ prediction.algorithm_name }}</td>
+                <td>{{ prediction.prediction.0 }}</td>
+                <td>{{ prediction.max_confidence }}</td>
+                <td>{{ prediction.accuracy }}</td>
 
-        // Loop through each model and create an image element
-        models.forEach(model => {
-            const img = document.createElement("img");
-            img.src = `/static/confusion_matrix/${model}_confusion_matrix.png`;
-            console.log(img.src)
-            img.alt = model;
-            img.style.width = "50%";  
-            container.appendChild(img);
-        });
-        window.addEventListener('DOMContentLoaded', (event) => {
-            // Automatically close the alert after 5 seconds (5000 milliseconds)
-            setTimeout(closeAlerts, 5000);
-        });
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table border="1">
+        <caption>Variação em Z-score: Quantos desvios padrão um valor específico está em relação à média da amostra.
+        </caption>
+        <caption>A variação está sendo considerada com o modelo KNN</caption>
+        <thead>
+            <tr>
+                <th>Parâmetro</th>
+                <th>N</th>
+                <th>P</th>
+                <th>K</th>
+                <th>Temperatura C°</th>
+                <th>Umidade</th>
+                <th>pH</th>
+                <th>Chuva</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in variations %}
+            <tr>
+                <td>Z-score</td>
+                {% for cell in row %}
+                <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-        function closeAlerts() {
-            let alerts = document.querySelectorAll('.alert');
-            alerts.forEach((alert) => {
-                alert.style.display = 'none';
-            });
-        }
+    <div id="image-container">
 
-        // Function to add a new row to the table
-        function addNewRow() {
-            const row = `
-                <tr>
-                    <td><input type="number" step="0.01" class="form-control" name="n"></td>
-                    <td><input type="number" step="0.01" class="form-control" name="p"></td>
-                    <td><input type="number" step="0.01" class="form-control" name="k"></td>
-                    <td><input type="number" step="0.01" class="form-control" name="temperature"></td>
-                    <td><input type="number" step="0.01" class="form-control" name="humidity"></td>
-                    <td><input type="number" step="0.01" class="form-control" name="ph"></td>
-                    <td><input type="number" step="0.01" class="form-control" name="rainfall"></td>
-                    <td><button class="btn btn-danger remove-row">Remover</button></td>
-                </tr>
-            `;
-            document.getElementById('inputRows').insertAdjacentHTML('beforeend', row);
-            updateTableDisplayStyle();
-        }
+    </div>
+</main>
 
-        // Function to remove a row from the table
-        function removeRow(event) {
-            if (event.target.classList.contains('remove-row')) {
-                event.target.closest('tr').remove();
-                updateTableDisplayStyle();
-            }
-        }
+{% endblock %}
+{% block scripts %}
 
-        // Function to update input fields based on selected instance
-        function updateInputFields() {
-            const selectElement = document.getElementById('instanceSelect');
-            const selectedInstanceId = selectElement.value;
-
-            if (selectedInstanceId) {
-                const instanceData = {
-                    name: '{{ selected_instance.name }}',
-                    author: '{{ selected_instance.author }}'
-                };
-
-                document.getElementById('instanceName').value = instanceData.name;
-                document.getElementById('instanceAuthor').value = instanceData.author;
-            } else {
-                document.getElementById('instanceName').value = '';
-                document.getElementById('instanceAuthor').value = '';
-            }
-        }
-
-        // Function to update table display style
-        function updateTableDisplayStyle() {
-            const table = document.querySelector('.table');
-            const rowCount = table.querySelectorAll('tbody tr').length;
-
-            if (rowCount > 0) {
-                table.classList.add('table-scrollable');
-            } else {
-                table.classList.remove('table-scrollable');
-            }
-        }
-
-        // Initial call to update table display
-        updateTableDisplayStyle();
-
-        // Event listeners
-        document.getElementById('addRow').addEventListener('click', addNewRow);
-        document.addEventListener('click', removeRow);
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>
+<script src="{% static 'js/algorithm.js' %}"></script>
+{% endblock %}
