@@ -7,7 +7,7 @@
 
 {% block content %}
 
-{% if messages %}S
+{% if messages %}
 <div class="messages">
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}" role="alert">
@@ -79,21 +79,14 @@
                 {% for parameter in parameters %}
                 
                 <tr>
-                    <td><input type="number" step="0.01" value="{{ parameter.n }}" class="form-control" name="n" min="0"
-                            required></td>
-                    <td><input type="number" step="0.01" value="{{ parameter.p }}" class="form-control" name="p" min="0"
-                            required></td>
-                    <td><input type="number" step="0.01" value="{{ parameter.k }}" class="form-control" name="k" min="0"
-                            required></td>
-                    <td><input type="number" step="0.01" value="{{ parameter.temperature }}" class="form-control"
-                            name="temperature" min="-100" max="100" required></td>
-                    <td><input type="number" step="0.01" value="{{ parameter.humidity }}" class="form-control"
-                            name="humidity" min="0" max="100" required></td>
-                    <td><input type="number" step="0.01" value="{{ parameter.ph }}" class="form-control" name="ph"
-                            min="0" max="14" required></td>
-                    <td><input type="number" step="0.01" value="{{ parameter.rainfall }}" class="form-control"
-                            name="rainfall" min="0" required></td>
-                </tr>
+                     <td><input type="number" step="0.01" class="form-control" name="n"></td>
+                <td><input type="number" step="0.01" class="form-control" name="p"></td>
+                <td><input type="number" step="0.01" class="form-control" name="k"></td>
+                <td><input type="number" step="0.01" class="form-control" name="temperature"></td>
+                <td><input type="number" step="0.01" class="form-control" name="humidity"></td>
+                <td><input type="number" step="0.01" class="form-control" name="ph"></td>
+                <td><input type="number" step="0.01" class="form-control" name="rainfall"></td>
+                
 
 
                 <td><button class="btn btn-danger remove-row" required>Remover</button></td>
