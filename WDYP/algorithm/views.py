@@ -26,8 +26,9 @@ import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def save_parameters(request):
     if request.method == 'POST':
         instance_id = request.POST.get('instance')
@@ -194,12 +195,14 @@ def save_parameters(request):
     
     
 
+@login_required
 def algorithm(request):
     instances = PlantingInstance.objects.all()
     return render(request, "algorithm/algorithm.html", {'instances': instances})
 
 
 
+@login_required
 def load_instance(request):
     instance_id = request.GET.get('instance_id')
     if instance_id == "":
@@ -233,6 +236,7 @@ def load_instance(request):
     })
 
 
+@login_required
 def train(request):
     
     model_path = os.path.join(settings.BASE_DIR,"train_algorithm/trained_models")

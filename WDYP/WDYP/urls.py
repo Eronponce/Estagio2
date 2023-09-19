@@ -3,6 +3,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('algorithm.urls')),  # Inclui as URLs do aplicativo "algorithm"
-    # ... outras URLs do seu projeto ...
+   
+    path('', include('algorithm.urls')),
+    path('', include('authentication.urls')),
+    # ... other project URLs ...
 ]

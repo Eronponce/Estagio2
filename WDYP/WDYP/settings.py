@@ -24,7 +24,7 @@ SECRET_KEY = "django-insecure-j0do@w78f193r@!h8=2@k4867n4nfb*@^hogt6&07!jsifi)o=
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+LOGIN_URL = 'login'
 ALLOWED_HOSTS = []
 
 STATIC_URL = "/static/"
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "algorithm",
+    "authentication",
+  
 ]
 
 MIDDLEWARE = [
@@ -73,6 +75,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "WDYP.wsgi.application"
 
+LOGIN_REDIRECT_URL = '/algorithm'
 
 DATABASES = {
 	'default': {
@@ -83,8 +86,6 @@ DATABASES = {
 		'HOST':'localhost',
 	}
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -108,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 

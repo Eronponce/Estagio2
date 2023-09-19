@@ -30,12 +30,6 @@ body {
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-#image-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
 .table {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: black;
@@ -142,4 +136,16 @@ th {
 
 tr:hover {
   background-color: #f5f5f5;
+}
+
+#image-container {
+  display: flex;
+  flex-wrap: nowrap; /* Isso evitará que as imagens se envolvam para a próxima linha */
+  overflow-x: auto;  /* Isso permitirá a rolagem horizontal se as imagens excederem a largura do contêiner */
+  white-space: nowrap; /* Isso evitará quebras de linha indesejadas */
+}
+#image-container img {
+  margin-right: 10px; /* Isso adicionará um espaço entre as imagens */
+  max-height: 400px;   /* Isso garantirá que as imagens não sejam muito altas */
+  width: auto;        /* Isso manterá a proporção da imagem */
 }

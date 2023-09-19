@@ -14,12 +14,23 @@
     {% endblock %}
     
 </head>
-<body>
+<body >
     <header class="header">
-        <a href="{% url 'algorithm' %}">
+        <a href="{% url 'home' %}">
             <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
         </a>
         <h1 id="main-title">What do <b>you</b> plant?</h1>
+        <div class="user-greeting">
+            {% if user.is_authenticated %}
+            <div class="input-group mb-3">
+                <span style="font-size: 25px; " class="btn-primary">Olá, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+            </div>
+
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            {% endif %}
+        </div>
     </header>
     <main>
         {% block content %}
@@ -31,3 +42,12 @@
 </body>
 
 </html>
+<style>
+    body{
+  background-image: url("{% static 'images/imagem.jpg' %}");
+    background-repeat: no-repeat;
+    height: 100%;
+    background-position: center;
+
+}
+</style>

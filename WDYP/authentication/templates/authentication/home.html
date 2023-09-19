@@ -1,0 +1,53 @@
+{% extends 'html/base.html' %}
+{% load static %}
+{% block title %}Inicio{% endblock %}
+
+{% block head %}
+
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+<link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block content %}
+<div style=" background: linear-gradient(
+    to bottom,
+    white,
+    transparent
+  );  ; font-size: 24px; font-weight: bold;">
+    <header>
+        <h1>Bem-vindo ao  WD<b>Y</b>P - O Que <b>Você </b>Semeia ?</h1>
+    </header>
+
+    <section>
+        <h2>Sobre o Projeto</h2>
+        <p>
+            WDYP é uma plataforma inovadora que utiliza o poder do aprendizado de máquina para fornecer previsões precisas em uma variedade de conjuntos de dados. Seja você um pesquisador, estudante ou entusiasta, nossa plataforma oferece uma interface amigável para treinar algoritmos e fazer previsões.
+        </p>
+    </section>
+
+    <section>
+        <h2>Funcionalidades</h2>
+        <ul>
+            <li>Interface fácil de usar para treinamento de algoritmos.</li>
+            <li>Suporte para múltiplos modelos de aprendizado de máquina.</li>
+            <li>Previsões em tempo real com modelos treinados.</li>
+            <li>Visualizações para entender o desempenho do modelo.</li>
+        </ul>
+    </section>
+
+    <section style="text-align: center;">
+        <h2>Comece Agora</h2>
+        {% if user.is_authenticated %}
+        <a  href="{% url 'algorithm' %}" class="btn btn-lg  btn-danger">Algoritmo</a>
+
+
+    {% else %}
+    <p>
+        Pronto para começar? <a href="{% url 'register' %}">Registre-se</a> agora e descubra o poder do WDYP!
+    </p>
+    {% endif %}
+      
+    </section>
+</div>
+{% endblock %}  
