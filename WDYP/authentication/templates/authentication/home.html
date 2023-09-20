@@ -1,20 +1,14 @@
 {% extends 'html/base.html' %}
-{% load static %}
-{% block title %}Inicio{% endblock %}
 
-{% block head %}
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
-
-<link rel="stylesheet" href="{% static 'css/forms.css' %}">
-{% endblock %}
 
 {% block content %}
-<div style=" background: linear-gradient(
-    to bottom,
-    white,
-    transparent
-  );  ; font-size: 24px; font-weight: bold;">
+<div class="container" style="max-width: 800px;
+margin: 50px auto;
+background-color: #fff;
+padding: 20px 30px;
+border-radius: 8px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
     <header>
         <h1>Bem-vindo ao  WD<b>Y</b>P - O Que <b>Você </b>Semeia ?</h1>
     </header>

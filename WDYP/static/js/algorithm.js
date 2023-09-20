@@ -36,20 +36,41 @@ function closeAlerts() {
 // Function to add a new row to the table
 function addNewRow() {
   const row = `
-            <tr>
-                <td><input type="number" step="0.01" class="form-control" name="n"></td>
-                <td><input type="number" step="0.01" class="form-control" name="p"></td>
-                <td><input type="number" step="0.01" class="form-control" name="k"></td>
-                <td><input type="number" step="0.01" class="form-control" name="temperature"></td>
-                <td><input type="number" step="0.01" class="form-control" name="humidity"></td>
-                <td><input type="number" step="0.01" class="form-control" name="ph"></td>
-                <td><input type="number" step="0.01" class="form-control" name="rainfall"></td>
-                <td><button class="btn btn-danger remove-row">Remover</button></td>
-            </tr>
+  <tr>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="n"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="p"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="k"></td>
+  <td><input type="number" step="0.01" min="-40" max="50" class="form-control" name="temperature"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="humidity"></td>
+  <td><input type="number" step="0.01" min="1" max="14" class="form-control" name="ph"></td>
+  <td><input type="number" step="0.01" min="0" max="1000" class="form-control" name="rainfall"></td>
+  <td><button class="btn btn-danger remove-row">Remover</button></td>
+</tr>
+
         `;
   document.getElementById("inputRows").insertAdjacentHTML("beforeend", row);
   updateTableDisplayStyle();
 }
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector("form");
+  
+  form.addEventListener("submit", function(event) {
+      // Verifica todos os inputs do tipo 'number'
+      const numberInputs = form.querySelectorAll("input[type='number']");
+      
+      for (let input of numberInputs) {
+          const min = parseFloat(input.getAttribute("min"));
+          const max = parseFloat(input.getAttribute("max"));
+          const value = parseFloat(input.value);
+          
+          if (value < min || value > max) {
+              alert(`Por favor, insira um valor válido para ${input.name}.`);
+              event.preventDefault(); // Impede o envio do formulário
+              return;
+          }
+      }
+  });
+});
 
 // Function to remove a row from the table
 function removeRow(event) {

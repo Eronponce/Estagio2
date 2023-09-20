@@ -211,6 +211,14 @@ def load_instance(request):
     instances = PlantingInstance.objects.all()
     instance = get_object_or_404(PlantingInstance, id=instance_id)
     parameters = PlantingParameters.objects.filter(instance=instance)
+    for param in parameters:
+        param.n = format(float(param.n), '.2f')
+        param.p = format(float(param.p), '.2f')
+        param.k = format(float(param.k), '.2f')
+        param.temperature = format(float(param.temperature), '.2f')
+        param.humidity = format(float(param.humidity), '.2f')
+        param.ph = format(float(param.ph), '.2f')
+        param.rainfall = format(float(param.rainfall), '.2f')
     predictions = PredictionInfo.objects.filter(instance=instance)
     for prediction in predictions:
         prediction.prediction = [prediction.prediction]
