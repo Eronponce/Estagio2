@@ -28,12 +28,8 @@ class PredictionInfo(models.Model):
     max_confidence = models.FloatField()
     algorithm_name = models.CharField(max_length=100)
     accuracy = models.FloatField()
+    knn_variation = models.CharField(max_length=100, default=0) # Add this field
+
     def __str__(self):
         return f"Prediction by {self.algorithm_name} for {self.instance}: {self.prediction} (Confidence: {self.max_confidence}, Accuracy: {self.accuracy})"
 
-
-class FormattedVariationKNN(models.Model):
-    instance = models.ForeignKey(PlantingInstance, on_delete=models.CASCADE)
-    variation = models.CharField(max_length=100)  # Using comma-separated values
-    def __str__(self):
-        return f"Formatted Variation for {self.instance}: {self.variation}"

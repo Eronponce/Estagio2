@@ -145,8 +145,7 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
     </table>
 
     <table border="1">
-        <caption>Variação em Z-score: Quantos desvios padrão um valor específico está em relação à média da amostra.
-        </caption>
+        <caption>Variação em Z-score: Quantos desvios padrão um valor específico está em relação à média da amostra.</caption>
         <caption>A variação está sendo considerada com o modelo KNN</caption>
         <thead>
             <tr>
@@ -161,14 +160,14 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
             </tr>
         </thead>
         <tbody>
-            {% for row in variations %}
+
             <tr>
-                <td>Z-score</td>
-                {% for cell in row %}
-                <td>{{ cell }}</td>
-                {% endfor %}
-            </tr>
+                <td>Z-score Knn</td>
+                {% for cell in variations %}
+            <td>{{ cell }}</td>
             {% endfor %}
+            </tr>
+           
         </tbody>
     </table>
 

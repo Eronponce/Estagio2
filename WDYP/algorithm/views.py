@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import PlantingInstance, PlantingParameters, PredictionInfo, FormattedVariationKNN
+from .models import PlantingInstance, PlantingParameters, PredictionInfo
 import joblib
 import numpy as np
 from django.contrib import messages
@@ -74,7 +74,7 @@ def save_parameters(request):
                     pass
         
         if 'execute_algorithm' in request.POST:
-          
+      
 
             try:
                 with open(os.path.join(settings.BASE_DIR, "train_algorithm", "model_accuracies.json"), "r") as f:
@@ -83,13 +83,22 @@ def save_parameters(request):
                 print(f"Could not load model accuracies. Error: {e}")
                 model_accuracies = {}
             print("Executing algorithm...")
-            average_n = sum([float(n) for n in n_values]) / len(n_values)
-            average_p = sum([float(p) for p in p_values]) / len(p_values)
-            average_k = sum([float(k) for k in k_values]) / len(k_values)
-            average_temperature = sum([float(temperature) for temperature in temperature_values]) / len(temperature_values)
-            average_humidity = sum([float(humidity) for humidity in humidity_values]) / len(humidity_values)
-            average_ph = sum([float(ph) for ph in ph_values]) / len(ph_values)
-            average_rainfall = sum([float(rainfall) for rainfall in rainfall_values]) / len(rainfall_values)
+
+            if n_values == None:
+                return redirect(f'/load_instance/?instance_id={instance.id}')
+            def calculate_average(values):
+                if values and len(values) > 0:
+                    return sum([float(val) for val in values]) / len(values)
+                else:
+                    return 0  # Or any other appropriate default value
+
+            average_n = calculate_average(n_values)
+            average_p = calculate_average(p_values)
+            average_k = calculate_average(k_values)
+            average_temperature = calculate_average(temperature_values)
+            average_humidity = calculate_average(humidity_values)
+            average_ph = calculate_average(ph_values)
+            average_rainfall = calculate_average(rainfall_values)
             
             average_values = [
                 average_n, average_p, average_k, average_temperature, average_humidity, average_ph, average_rainfall
@@ -101,7 +110,7 @@ def save_parameters(request):
            
             df = pd.read_csv(csv_path)
             X = df.drop('label', axis=1)
-
+           
             scaler = MinMaxScaler()
             scaler.fit(X)
             
@@ -153,27 +162,35 @@ def save_parameters(request):
                 })
             instances = PlantingInstance.objects.all()
             parameters = PlantingParameters.objects.filter(instance=instance)
+            for param in parameters:
+                param.n = format(float(param.n), '.2f')
+                param.p = format(float(param.p), '.2f')
+                param.k = format(float(param.k), '.2f')
+                param.temperature = format(float(param.temperature), '.2f')
+                param.humidity = format(float(param.humidity), '.2f')
+                param.ph = format(float(param.ph), '.2f')
+                param.rainfall = format(float(param.rainfall), '.2f')
+
             sc_x = StandardScaler()
             sc_x.fit(X)
 
             knn_classifier = neighbors.KNeighborsClassifier(n_neighbors=19, metric='euclidean')
             knn_classifier.fit(sc_x.transform(X), df['label'])
-
-
+ 
             scaled_average_values = sc_x.transform(pd.DataFrame([average_values], columns=X.columns))
-
-            prediction_knn = knn_classifier.predict(scaled_average_values)
-            mean_values_knn = df[df['label'] == prediction_knn[0]].mean(numeric_only=True)
-            scaled_mean_values_knn = sc_x.transform(pd.DataFrame([mean_values_knn.values], columns=X.columns))
-            variation_knn = np.abs(scaled_average_values - scaled_mean_values_knn)
-            rounded_variation_knn = np.around(variation_knn, 1)
-            formatted_variation_knn = [[f"{x:.1f}" for x in row] for row in rounded_variation_knn]
-            print("prediction info", predictions_info)
-            print("instance", instance)
-            print("parameters", parameters)
-            print("formatted_variation_knn", formatted_variation_knn)
             
-            PredictionInfo.objects.filter(instance=instance).delete()
+            prediction_knn = knn_classifier.predict(scaled_average_values)
+          
+            culture_df = df[df['label'] == prediction_knn[0]]
+            culture_df = culture_df.drop(columns=['label'])
+            culture_mean = culture_df.mean()
+            culture_std = culture_df.std()
+            z_score = (average_values - culture_mean) / culture_std
+            
+            z_score_list = [str(round(val, 1)) for val in z_score]
+            formatted_variation_str = ','.join(z_score_list) 
+            
+           
             for pred_info in predictions_info:
                 PredictionInfo.objects.create(
                     instance=instance,
@@ -181,16 +198,12 @@ def save_parameters(request):
                     prediction=pred_info['prediction'][0], 
                     max_confidence=float(pred_info['max_confidence']),
                     algorithm_name=pred_info['algorithm_name'],
-                    accuracy=float(pred_info['accuracy'])
-                )
-            FormattedVariationKNN.objects.filter(instance=instance).delete()
-            formatted_variation_str = ','.join(formatted_variation_knn[0]) 
-            FormattedVariationKNN.objects.create(
-                instance=instance,
-                variation=formatted_variation_str
-            )
-            print(formatted_variation_knn)
-            return render(request, "algorithm/algorithm.html", {'instances': instances,'predictions_info': predictions_info, 'instance': instance ,'parameters' : parameters,'variations': formatted_variation_knn})
+                    accuracy=float(pred_info['accuracy']),
+                    knn_variation=formatted_variation_str  # Include the variation here
+    )
+
+            
+            return render(request, "algorithm/algorithm.html", {'instances': instances,'predictions_info': predictions_info, 'instance': instance ,'parameters' : parameters,'variations': z_score_list})
     return redirect(f'/load_instance/?instance_id={instance.id}')
     
     
@@ -223,9 +236,10 @@ def load_instance(request):
     for prediction in predictions:
         prediction.prediction = [prediction.prediction]
 
-    variation = FormattedVariationKNN.objects.filter(instance=instance).first()
+    prediction_info = PredictionInfo.objects.filter(instance=instance).first()
+    formatted_variation = prediction_info.knn_variation if prediction_info else None
     try:
-        formatted_variation = [variation.variation.split(",")]
+        formatted_variation = [prediction_info.knn_variation.split(",")]
     except AttributeError:
         formatted_variation = None
     if 'delete_instance' in request.GET:
@@ -240,7 +254,8 @@ def load_instance(request):
         'instance': instance,
         'parameters': parameters,
         'predictions_info': predictions,
-        'variations': formatted_variation if formatted_variation else None
+        'knn_variation': formatted_variation[0] if formatted_variation and formatted_variation[0] else None
+
     })
 
 
@@ -301,7 +316,7 @@ def train(request):
             plt.xlabel('Predicted label')
             plt.title(title)
             plt.tight_layout()
-            print(image_path)
+          
             plt.savefig(image_path)
             plt.close()
         except Exception as e:
