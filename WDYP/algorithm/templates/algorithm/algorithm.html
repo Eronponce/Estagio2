@@ -52,9 +52,8 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
             </div>
             <div class="col-md-6 mb-3">
                 <label for="instanceAuthor" class="form-label">Autor:</label>
-                <input {% if instance.author %} disabled {% endif %} type="text" class="form-control"
-                    value="{% if instance.author %}{{ instance.author }}{% else %}{{ user.username }}{% endif %}"
-                    id="instanceAuthor" name="instance_author" required>
+                <input {% if instance.author %} value="{{ instance.author }}" {% else %} value="{{ user.username }}" {% endif %}
+                    type="text" class="form-control" id="instanceAuthor" name="instance_author" required>
             </div>
         </div>
         <div class="d-flex justify-content-between mb-3">

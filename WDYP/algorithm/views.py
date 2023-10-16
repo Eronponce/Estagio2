@@ -74,7 +74,7 @@ def save_parameters(request):
                     pass
         
         if 'execute_algorithm' in request.POST:
-      
+            PredictionInfo.objects.filter(instance=instance).delete()
 
             try:
                 with open(os.path.join(settings.BASE_DIR, "train_algorithm", "model_accuracies.json"), "r") as f:
@@ -244,10 +244,10 @@ def load_instance(request):
         formatted_variation = None
     if 'delete_instance' in request.GET:
         instance.delete()
-        messages.error(request, 'Instance deleted successfully.')
+        messages.error(request, 'Instancia e resultados deletados.')
         return redirect('algorithm')
     
-    messages.success(request, 'Parameters loaded successfully.')
+    messages.success(request, 'Instancia e resultados carregados.')
 
     return render(request, "algorithm/algorithm.html", {
         'instances': instances,
@@ -342,11 +342,11 @@ def train(request):
             plt.close()
             dump(model, model_path)
         except Exception as e:
-            messages.error(request, f"Could not train {name}. Error: {e}")
+            messages.error(request, f"Não foi possivel treinar {name}. Error: {e}")
 
     with open(os.path.join(settings.BASE_DIR, "train_algorithm", "model_accuracies.json"), "w") as f:
         json.dump(model_accuracies, f)
-    messages.success(request, "Trained models")
+    messages.success(request, "modelos treinados com sucesso!")
     return redirect('algorithm')
 
 
