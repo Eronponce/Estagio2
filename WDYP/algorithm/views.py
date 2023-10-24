@@ -202,7 +202,7 @@ def save_parameters(request):
                     knn_variation=formatted_variation_str  # Include the variation here
     )
 
-            
+            print(z_score_list)
             return render(request, "algorithm/algorithm.html", {'instances': instances,'predictions_info': predictions_info, 'instance': instance ,'parameters' : parameters,'variations': z_score_list})
     return redirect(f'/load_instance/?instance_id={instance.id}')
     
@@ -248,13 +248,13 @@ def load_instance(request):
         return redirect('algorithm')
     
     messages.success(request, 'Instancia e resultados carregados.')
-
+    print(formatted_variation[0])
     return render(request, "algorithm/algorithm.html", {
         'instances': instances,
         'instance': instance,
         'parameters': parameters,
         'predictions_info': predictions,
-        'knn_variation': formatted_variation[0] if formatted_variation and formatted_variation[0] else None
+        'variations': formatted_variation[0] if formatted_variation and formatted_variation[0] else None
 
     })
 

@@ -37,20 +37,20 @@ function closeAlerts() {
 function addNewRow() {
   const row = `
   <tr>
-  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="n"></td>
-  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="p"></td>
-  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="k"></td>
-  <td><input type="number" step="0.01" min="-40" max="50" class="form-control" name="temperature"></td>
-  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="humidity"></td>
-  <td><input type="number" step="0.01" min="1" max="14" class="form-control" name="ph"></td>
-  <td><input type="number" step="0.01" min="0" max="1000" class="form-control" name="rainfall"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="n" value="0"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="p" value="0"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="k" value="0"></td>
+  <td><input type="number" step="0.01" min="-40" max="50" class="form-control" name="temperature" value="0"></td>
+  <td><input type="number" step="0.01" min="0" max="100" class="form-control" name="humidity" value="0"></td>
+  <td><input type="number" step="0.01" min="1" max="14" class="form-control" name="ph" value="7"></td>
+  <td><input type="number" step="0.01" min="0" max="1000" class="form-control" name="rainfall" value="0"></td>
   <td><button class="btn btn-danger remove-row">Remover</button></td>
 </tr>
-
         `;
   document.getElementById("inputRows").insertAdjacentHTML("beforeend", row);
   updateTableDisplayStyle();
 }
+
 document.addEventListener("DOMContentLoaded", function() {
   const form = document.querySelector("form");
   
