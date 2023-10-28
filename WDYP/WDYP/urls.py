@@ -6,5 +6,6 @@ urlpatterns = [
    
     path('', include('algorithm.urls')),
     path('', include('authentication.urls')),
+    path('', include('owner.urls')),
     # ... other project URLs ...
 ]

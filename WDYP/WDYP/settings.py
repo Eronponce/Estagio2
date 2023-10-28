@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "algorithm",
     "authentication",
+    "owner.apps.OwnerConfig"
   
 ]
 
@@ -77,12 +78,21 @@ WSGI_APPLICATION = "WDYP.wsgi.application"
 
 LOGIN_REDIRECT_URL = '/algorithm'
 
+# DATABASES = {
+# 	'default': {
+# 		'ENGINE': 'django.db.backends.mysql',
+# 		'NAME': 'estagio',
+# 		'USER': 'root',
+# 		'PASSWORD': 'root',
+# 		'HOST':'localhost',
+# 	}
+# }
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.mysql',
-		'NAME': 'estagio',
+		'NAME': 'estagioeron',
 		'USER': 'root',
-		'PASSWORD': 'root',
+		'PASSWORD': '',
 		'HOST':'localhost',
 	}
 }
