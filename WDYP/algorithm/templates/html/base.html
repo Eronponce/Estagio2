@@ -20,11 +20,15 @@
         <a href="{% url 'home' %}">
             <img src="{% static 'images/logo.png' %}" class="logo" alt="Logo">
         </a>
+        <div style="margin-left: 1rem;">
+            <a href="{% url 'owner' %}">Produtor</a>
+            <a href="{% url 'property' %}">Propriedade</a>
+        </div>
         <h1 id="main-title">What do <b>you</b> plant?</h1>
         <div class="user-greeting">
             {% if user.is_authenticated %}
             <div class="input-group mb-3">
-                <span style="font-size: 25px; " class="btn-primary">Olá, {{ user.username }}!</span>
+                <span style="font-size: 25px; margin-right: 1rem; " class="btn-primary ">Olá, {{ user.username }}!</span>
                 <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
             </div>
 
