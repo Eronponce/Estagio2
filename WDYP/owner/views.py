@@ -11,7 +11,6 @@ def controlOwner(request):
         name = request.POST.get('name')
         cpf = request.POST.get('cpf')
         birth = request.POST.get('birth')
-        birth = parse_date(birth)
         owner_instance = Owner(
         name=name,
         cpf=cpf,
