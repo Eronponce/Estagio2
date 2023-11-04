@@ -1,8 +1,15 @@
-{% extends 'html/base.html' %}
-{% load static %}
-{% block title %}Property{% endblock %}
+{% extends 'html/base.html' %} 
+{% load static %} 
+{% block title %}owner{%endblock %} 
+{% block content %}
+<main class="container d-flex justify-content-center align-items-center">
+   <div> {{ property_form.ownerid}}</div>
+    <form method="post">
+        {% csrf_token %}
+        {{ property_form.as_p }}
+        <button type="submit">Salvar Propriedade</button>
+    </form>
 
-
-<main class="conteiner ">
-    
 </main>
+
+{% endblock %}

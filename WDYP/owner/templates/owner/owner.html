@@ -1,11 +1,12 @@
 {% extends 'html/base.html' %} 
 {% load static %} 
-{% block title %}owner{%endblock %} 
+{% block title %}owner{% endblock %} 
 {% block content %}
-<main class="container d-flex justify-content-center align-items-center">
-  <form method="post">
-    {% csrf_token %} {{ owner_form.as_p }}
-    <button type="submit">Salvar</button>
+<main class="container d-flex flex-column align-items-center">
+  <form method="post" class="my-3">
+    {% csrf_token %}
+    {{ owner_form.as_p }}
+    <button type="submit" class="btn btn-primary">Salvar</button>
   </form>
 
   <table class="table">
@@ -13,7 +14,7 @@
       <tr>
         <th>Name</th>
         <th>CPF</th>
-        <th>birth</th>
+        <th>Birth</th>
 
       </tr>
     </thead>
@@ -23,21 +24,18 @@
         <td>{{ owner.name }}</td>   
         <td>{{ owner.cpf }}</td>
         <td>{{ owner.birth }}</td>
-        <td>
-          <a href="{% url 'edit_owner' owner.id %}" class="btn btn-primary"
-            >Editar</a
-          >
-        </td>
-        <td>
+        <td class="d-flex align-items-center">
+          <a href="{% url 'edit_owner' owner.id %}" class="btn btn-primary mr-2">Editar</a>
           <form method="post" action="{% url 'delete_owner' owner.id %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Excluir</button>
           </form>
         </td>
+        
+        
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </main>
-
 {% endblock %}

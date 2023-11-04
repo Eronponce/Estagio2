@@ -1,11 +1,12 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from .models import Owner, Property, OwnerForm, PropertyForm
 from django.utils.dateparse import parse_date
-# Create your views here.
+
 def controlOwner(request):
     
 
     owner_form = OwnerForm(request.POST or None)
+    owners = Owner.objects.all()
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -18,19 +19,23 @@ def controlOwner(request):
 
     )
         owner_instance.save()
-        owners = Owner.objects.all()
         return render(request, 'owner/owner.html', {"owner_form": owner_form, "owners": owners})
 
 
-    return render(request, 'owner/owner.html', {"owner_form": owner_form})
+    return render(request, 'owner/owner.html', {"owner_form": owner_form, "owners": owners})
 
 def update_owner(request, id):
-    owner = Owner.objects.get(id=id)
-    owner_form = OwnerForm(request.POST or None, instance=owner)
-    if owner_form.is_valid():
-        owner_form.save()
-        return redirect('/owner')
-    return render(request, 'owner/owner.html', {'owner_form': owner_form, 'owner': owner})
+    print( "update"	)
+    owner = get_object_or_404(Owner, id=id)
+    print( "form"	)
+    if request.method == 'POST':
+        form = OwnerForm(request.POST, instance=owner)
+        if form.is_valid():
+            form.save()
+            return redirect('owner_page')
+    
+    form = OwnerForm(instance=owner)
+    return render(request, 'owner/edit.html', {'form': form})
 
 def delete_owner(request, id):
     owner = Owner.objects.get(id=id)
@@ -39,6 +44,22 @@ def delete_owner(request, id):
         return redirect('/owner')
     return render(request, 'owner/confirm_delete.html', {'owner': owner})
 
-def controlProperty(request):
-    return render(request, 'owner/property.html')
 
+def controlProperty(request):
+    property_form = PropertyForm(request.POST or None)
+
+    if request.method == 'POST':
+        if property_form.is_valid():
+            owner_id = property_form.cleaned_data.get('owner')
+            try:
+                owner = Owner.objects.get(id=owner_id)
+            except Owner.DoesNotExist:
+                return render(request,"property.html",{"error_message": "Proprietário não existe."})
+
+            property_instance = property_form.save(commit=False)
+            property_instance.proprietario = owner
+            property_instance.save()
+
+            return redirect('property_list')  # Redirecione para a página de lista de propriedades
+
+    return render(request, 'owner/property.html', {"property_form": property_form, "property": Property.objects.all()})
