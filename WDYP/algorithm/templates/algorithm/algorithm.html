@@ -51,7 +51,7 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
                     name="instance_name" required>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="instanceAuthor" class="form-label">Autor:</label>
+                <label for="instanceAuthor" class="form-label">Agrônomo:</label>
                 <input {% if instance.author %} value="{{ instance.author }}" {% else %} value="{{ user.username }}" {% endif %}
                     type="text" class="form-control" id="instanceAuthor" name="instance_author" required>
             </div>
