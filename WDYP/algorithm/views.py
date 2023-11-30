@@ -248,7 +248,7 @@ def load_instance(request):
         return redirect('algorithm')
     
     messages.success(request, 'Instancia e resultados carregados.')
-    print(formatted_variation[0])
+    
     return render(request, "algorithm/algorithm.html", {
         'instances': instances,
         'instance': instance,
